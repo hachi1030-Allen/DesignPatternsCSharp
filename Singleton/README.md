@@ -1,13 +1,14 @@
 # Implementation of Singleton Pattern in C#
 
 ## Table of Contents
-- [Introduction](#Introduction)
+- [Introduction](#introduction)
 - [Non-thread-safe version](#first-version---not-thread-safe)
 - [Simple thread-safe via locking](#second-version---simple-thread-safe)
 - [Double-checked locking](#third-version---thread-safe-using-double-checked-locking)
 - [Intialize using static constructor](#fourth-version---not-quite-as-lazy-but-thread-safe-without-using-locks)
 - [Safe and fully lazy static intialization](#fifth-version---fully-lazy-instantiation)
-- [Lazy[T]](#sixth-version---using-NET-4-s-Lazy<T>-type)
+- [Lazy[T]](#sixth-version---using-net-4s-lazy-type)
+- [Conclusion](#conclusion)
 
 ## Introduction
 Singleton pattern is one of the best-known pattern in software engineering. Essentially, a singleton is a class which only allows a single instance of itself to be created, and usually gives simple access to that instance.
@@ -139,8 +140,84 @@ For the explaination, I will just copy from C# in Depth document.
 
 ## Fourth version - not quite as lazy, but thread-safe without using locks
 
-fsdf
+Code:
+
+```csharp
+public sealed class SingletonV4
+{
+    private static readonly SingletonV4 instance = null;
+
+    // Explicit static constructor to tell C# compiler
+    // not to mark type as beforefieldinit
+    private SingletonV4() 
+    {
+
+    }
+
+    static SingletonV4() 
+    {
+        instance = new SingletonV4();
+    }
+
+    public static SingletonV4 Instance
+    {
+        get 
+        {
+            return instance;
+        }
+    }
+}
+```
+
+This implementation instantiate the class in the static constructor.This is thread-safe because static constructor will only be run once when the first thread attempts to access any static member for that class.</br>
+How is the lazy then? It's not as lazy as other implementations. Assume that this class has another static member other than `Instance`, the first reference to that member will involve creating the instance. 
 
 ## Fifth version - fully lazy instantiation
 
+Code:
+
+```csharp
+public sealed class SingletonV5
+{
+    public static SingletonV5 Instance { get { return Nested.instance; }}
+
+    private class Nested
+    {
+        static Nested() {}
+        internal static readonly SingletonV5 instance = new SingletonV5();
+    }
+}
+```
+
+Here, instantiation is triggered by the first reference to the static member of the nested class, which only occurs in Instance. This means the implementation is fully lazy, but has all the performance benefits of the previous ones.
+
 ## Sixth version - using .NET 4's Lazy<T> type
+
+Note: This requires .NET 4.0 or higher.
+
+Code:
+
+```csharp
+public sealed class SingletonV6
+{
+    private static readonly Lazy<SingletonV6> lazy = new Lazy<SingletonV6>(() => new SingletonV6());
+
+    public static SingletonV6 Instace {get {return lazy.Value;}}
+
+    private SingletonV6() {}
+}
+```
+
+It's simple and performs well. It also allows you to check whether or not the instance has been created yet with the `IsValueCreated` property, if you need that.
+
+The code above implicitly uses `LazyThreadSafetyMode.ExecutionAndPublication` as the thread safety mode for the `Lazy<SingletonV6>`. Depending on your requirements, you may wish to experiment with other modes.
+
+## Conclusion
+
+Definitely choose the thread-safe implementations becuase in modern world, it's not possible to have single thread application especially for web apps.
+
+If you are a starter with .NET, use the 6th version, which is quite simple and safe.
+
+If no need to consider too much about performance, then choose version 2 or 4. (4 is preferred.)
+
+Solution 5 is elegant, but trickier than 2 and 4.
