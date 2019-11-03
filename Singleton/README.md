@@ -6,6 +6,8 @@
 - [Simple thread-safe via locking](#second-version---simple-thread-safe)
 - [Double-checked locking](#third-version---thread-safe-using-double-checked-locking)
 - [Intialize using static constructor](#fourth-version---not-quite-as-lazy-but-thread-safe-without-using-locks)
+- [Safe and fully lazy static intialization](#fifth-version---fully-lazy-instantiation)
+- [Lazy[T]](#sixth-version---using-NET-4-s-Lazy<T>-type)
 
 ## Introduction
 Singleton pattern is one of the best-known pattern in software engineering. Essentially, a singleton is a class which only allows a single instance of itself to be created, and usually gives simple access to that instance.
@@ -138,3 +140,7 @@ For the explaination, I will just copy from C# in Depth document.
 ## Fourth version - not quite as lazy, but thread-safe without using locks
 
 fsdf
+
+## Fifth version - fully lazy instantiation
+
+## Sixth version - using .NET 4's Lazy<T> type
