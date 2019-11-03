@@ -3,7 +3,7 @@
 ## Table of Contents
 - [Introduction](#Introduction)
 - [Non-thread-safe version](#first-version---not-thread-safe)
-- [c](#c)
+- [Simple thread-safe via locking](#second-version---simple-thread-safe)
 
 ## Introduction
 Singleton pattern is one of the best-known pattern in software engineering. Essentially, a singleton is a class which only allows a single instance of itself to be created, and usually gives simple access to that instance.
@@ -29,4 +29,34 @@ In the repository, I named the Singleton class from V1 to V6, which is actually 
 
 ## First version - not thread-safe
 
-## c
+Code:
+
+```csharp
+public sealed class SingletonV1
+{
+    /// <summary>
+    /// First version - Lazy load and not thread-safe
+    /// This version is bad code, usually should not use this version
+    /// It's simply check whether the instance is null, and if yes,
+    /// then instantiate the class and return.
+    /// If in a multi-thread environment, this is not thread-safe at all.
+    /// </summary>
+    private static SingletonV1 instance = null;
+    private SingletonV1(){}
+    public static SingletonV1 Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = new SingletonV1();
+            }
+            return instance;
+        }
+    }
+}
+```
+
+The above code is not thread-safe. There is chance that 2 or more different threads have evaluated the test `if (instace == null)` and return ture, then different instances got created which violates the singleton pattern.
+
+## Second version - simple thread-safe
