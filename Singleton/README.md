@@ -5,7 +5,7 @@
 - [Non-thread-safe version](#first-version---not-thread-safe)
 - [Simple thread-safe via locking](#second-version---simple-thread-safe)
 - [Double-checked locking](#third-version---thread-safe-using-double-checked-locking)
-- [Intialize using static constructor](fourth-version---not-quite-as-lazy-but-thread-safe-without-using-locks)
+- [Intialize using static constructor](#fourth-version---not-quite-as-lazy-but-thread-safe-without-using-locks)
 
 ## Introduction
 Singleton pattern is one of the best-known pattern in software engineering. Essentially, a singleton is a class which only allows a single instance of itself to be created, and usually gives simple access to that instance.
