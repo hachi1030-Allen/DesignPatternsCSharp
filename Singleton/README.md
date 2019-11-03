@@ -1,1 +1,9 @@
-This is a testing readme.
+# Implementation of Singleton Pattern in C#
+
+[TOC]
+
+## a
+
+## b
+
+## c
