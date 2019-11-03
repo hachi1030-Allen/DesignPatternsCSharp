@@ -1,6 +1,6 @@
 using System;
 
-namespace Singleton
+namespace SingletonCls
 {
     // First version - Lazy load and not thread-safe
     public sealed class SingletonV1
