@@ -1,6 +1,9 @@
 # Implementation of Singleton Pattern in C#
 
-[TOC]
+## Table of Contents
+- [a](#a)
+- [b](#b)
+- [c](#c)
 
 ## a
 
