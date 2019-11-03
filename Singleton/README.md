@@ -2,7 +2,7 @@
 
 ## Table of Contents
 - [Introduction](#Introduction)
-- [Non-thread-safe version](#First version - not thread-safe)
+- [Non-thread-safe version](#first-version---not-thread-safe)
 - [c](#c)
 
 ## Introduction
