@@ -4,6 +4,8 @@
 - [Introduction](#Introduction)
 - [Non-thread-safe version](#first-version---not-thread-safe)
 - [Simple thread-safe via locking](#second-version---simple-thread-safe)
+- [Double-checked locking](#third-version---thread-safe-using-double-checked-locking)
+- [Intialize using static constructor](fourth-version---not-quite-as-lazy-but-thread-safe-without-using-locks)
 
 ## Introduction
 Singleton pattern is one of the best-known pattern in software engineering. Essentially, a singleton is a class which only allows a single instance of itself to be created, and usually gives simple access to that instance.
@@ -60,3 +62,77 @@ public sealed class SingletonV1
 The above code is not thread-safe. There is chance that 2 or more different threads have evaluated the test `if (instace == null)` and return ture, then different instances got created which violates the singleton pattern.
 
 ## Second version - simple thread-safe
+
+Code:
+
+```csharp
+public sealed class SingletonV2
+{
+    private static SingletonV2 instance = null;
+    private static readonly object padlock = new object();
+    // Private constructor
+    private SingletonV2() {}
+
+    public static SingletonV2 Instance
+    {
+        get
+        {
+            lock (padlock)
+            {
+                if (instance == null)
+                {
+                    instance = new SingletonV2();
+                }
+                return instance;
+            }
+        }
+    }
+}
+```
+
+This implementation is thread-safe. We used object locker to enable the synchronization. However, this implementation is argued that might have performance issue because each time a thread is attempting to get the instance of the class, it will go through the lock and lock is kind of heavy operation.
+
+## Third version - thread-safe using double-checked locking
+
+This is an improved version of the second version because we added one more null check outside the locker, which can avoid lots of the lock operations.
+
+Code:
+
+```csharp
+public sealed class SingletonV3
+{
+    private static SingletonV3 instance = null;
+    private static readonly object padlock = new object();
+
+    private SingletonV3() {}
+
+    public static SingletonV3 Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                lock(padlock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new SingletonV3();
+                    }
+                }
+            }
+            return instance;
+        }
+    }
+}
+```
+
+This is actually quite recommended in Java world, however, this one is not recommended in .NET world due to memory model difference between Java and C#.
+
+For the explaination, I will just copy from C# in Depth document.
+
+- It doesn't work in Java. This may seem an odd thing to comment on, but it's worth knowing if you ever need the singleton pattern in Java, and C# programmers may well also be Java programmers. The Java memory model doesn't ensure that the constructor completes before the reference to the new object is assigned to instance. The Java memory model underwent a reworking for version 1.5, but double-check locking is still broken after this without a `volatile` variable (as in C#).
+- Without any memory barriers, it's broken in the ECMA CLI specification too. It's possible that under the .NET 2.0 memory model (which is stronger than the ECMA spec) it's safe, but I'd rather not rely on those stronger semantics, especially if there's any doubt as to the safety. Making the instance variable volatile can make it work, as would explicit memory barrier calls, although in the latter case even experts can't agree exactly which barriers are required. I tend to try to avoid situations where experts don't agree what's right and what's wrong!
+- It's easy to get wrong. The pattern needs to be pretty much exactly as above - any significant changes are likely to impact either performance or correctness.
+- It still doesn't perform as well as the later implementations.
+
+## Fourth version - not quite as lazy, but thread-safe without using locks
